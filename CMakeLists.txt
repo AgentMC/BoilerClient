@@ -30,6 +30,7 @@ include(pico_sdk_import.cmake)
 
 project(boiler_client C CXX ASM)
 
+#DO NOT FORGET TO SET THESE!
 set(WIFI_SSID "Your Wi-Fi SSID")
 set(WIFI_PASSWORD "Your Wi-Fi Password")
 set(TLS_CLIENT_SERVER "Your-Boiler-Manager-Server.com")
@@ -49,6 +50,7 @@ target_compile_definitions(boiler_client_background PRIVATE
         WIFI_PASSWORD=\"${WIFI_PASSWORD}\"
         TLS_CLIENT_SERVER=\"${TLS_CLIENT_SERVER}\"
         )
+target_compile_options(boiler_client_background PRIVATE -Wno-psabi) # Ignore warnings from stl_tree.h
 target_include_directories(boiler_client_background PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}
         ${CMAKE_CURRENT_LIST_DIR}/.. # for our common lwipopts and mbedtls_config.h
@@ -66,9 +68,6 @@ target_link_libraries(boiler_client_background
         )
 #generate uf2
 pico_add_extra_outputs(boiler_client_background)
-
-# Ignore warnings from stl_tree.h
-add_compile_options(-Wno-psabi)
 
 # Ignore warnings from lwip code
 set_source_files_properties(

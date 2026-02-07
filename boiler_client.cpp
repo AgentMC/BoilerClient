@@ -3,10 +3,7 @@
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
- * Copyright (c) 2023 Mykhailo Makarov
- * ******
- * cd build
- * cmake .. -DPICO_BOARD=pico_w -DBOILER_MANAGER_SERVER=________.com -DWIFI_SSID=______ -DWIFI_PASSWORD=_________
+ * Copyright (c) 2023, 2026 Mykhailo Makarov
  */
 
 #ifndef NDEBUG
