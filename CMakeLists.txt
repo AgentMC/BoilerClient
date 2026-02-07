@@ -67,6 +67,9 @@ target_link_libraries(boiler_client_background
 #generate uf2
 pico_add_extra_outputs(boiler_client_background)
 
+# Ignore warnings from stl_tree.h
+add_compile_options(-Wno-psabi)
+
 # Ignore warnings from lwip code
 set_source_files_properties(
         ${PICO_LWIP_PATH}/src/apps/altcp_tls/altcp_tls_mbedtls.c
