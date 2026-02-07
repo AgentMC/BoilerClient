@@ -254,8 +254,7 @@ static void tls_client_err(void *arg, err_t err)
     TLS_CLIENT_T *state = (TLS_CLIENT_T *)arg;
     state->stage = MAX(6, state->stage);
     D(printf("tls_client_err(): error %d\n", err);)
-    state->pcb = NULL; /* pcb freed by lwip when _err function is called */
-    state->complete = true;
+    tls_client_close(state);
 }
 
 static err_t tls_client_recv(void *arg, struct altcp_pcb *pcb, struct pbuf *p, err_t err)
@@ -417,10 +416,7 @@ bool oneWireIteration(One_wire *sensor)
 
 void primaryCycle()
 {
-    /* No CA certificate checking */
-    D(printf("Init web config...\r\n");)
-    auto tls_config = altcp_tls_create_config_client(NULL, 0);
-
+    altcp_tls_config *tls_config = nullptr;
     D(printf("Init OneWire...\r\n");)
     One_wire one_wire(ONEWIRE_GPIO_PIN);
     one_wire.init();
@@ -437,32 +433,48 @@ void primaryCycle()
         cycles = 1;
         if (oneWireIteration(&one_wire))
         {
-            auto state = sendPacketIteration(tls_config);
-            if (state)
+            if(!tls_config) //do not reinitialize TLS config if already created, to save time.
             {
-                D(printf("Iteration: web success:%s, HTTP status code: %i, sequence stage: %i.\r\n", state->webSuccess ? "yes" : "no", state->httpStatus, state->stage);)
-                if (state->webSuccess && state->httpStatus == 200)
+                /* No CA certificate checking */
+                D(printf("Init web config...\r\n");)
+                tls_config = altcp_tls_create_config_client(NULL, 0);
+            }
+            if(tls_config)
+            {
+                auto state = sendPacketIteration(tls_config);
+                if (state)
                 {
-                    led_pulse(1, 1000, true, Green);
-                    cycles = 12;
-                    consecutiveErrors = 0;
+                    D(printf("Iteration: web success:%s, HTTP status code: %i, sequence stage: %i.\r\n", state->webSuccess ? "yes" : "no", state->httpStatus, state->stage);)
+                    if (state->webSuccess && state->httpStatus == 200)
+                    {
+                        led_pulse(1, 1000, true, Green);
+                        cycles = 12;
+                        consecutiveErrors = 0;
+                    }
+                    else
+                    {
+                        led_pulse(state->stage, 300, true, Red);
+                        if (++consecutiveErrors >= 5)
+                        {
+                            free(state);
+                            altcp_tls_free_config(tls_config);
+                            cyw43_arch_deinit();
+                            reboot();
+                            goto skip; // drop to __wfe() until watchdog's cycle clicks.
+                        }
+                    }
+                    free(state);
                 }
                 else
                 {
-                    led_pulse(state->stage, 200, true, Red);
-                    if (++consecutiveErrors >= 5)
-                    {
-                        cyw43_arch_deinit();
-                        reboot();
-                        goto skip; // drop to __wfe() until watchdog's cycle clicks.
-                    }
+                    led_pulse(2, 500, true, Yellow);
+                    D(printf("Iteration: unable to create State.\r\n");)
                 }
-                free(state);
             }
             else
             {
                 led_pulse(1, 1000, true, Yellow);
-                D(printf("Iteration: unable to create State.\r\n");)
+                D(printf("Iteration: unable to create tls_config.\r\n");)
             }
         }
         else
@@ -473,8 +485,6 @@ void primaryCycle()
     skip:
         sleep_us(5000000 - (time_us_32() % 1000000));
     }
-
-    altcp_tls_free_config(tls_config);
 }
 
 int main()
