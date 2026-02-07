@@ -148,7 +148,7 @@ static bool tls_client_open(const char *hostname, void *arg) {
     altcp_err(state->pcb, tls_client_err);
 
     /* Set SNI */
-    mbedtls_ssl_set_hostname(altcp_tls_context(state->pcb), hostname);
+    mbedtls_ssl_set_hostname((mbedtls_ssl_context *)altcp_tls_context(state->pcb), hostname);
 
     printf("resolving %s\n", hostname);
 
@@ -177,7 +177,7 @@ static bool tls_client_open(const char *hostname, void *arg) {
 
 // Perform initialisation
 static TLS_CLIENT_T* tls_client_init(void) {
-    TLS_CLIENT_T *state = calloc(1, sizeof(TLS_CLIENT_T));
+    TLS_CLIENT_T *state = (TLS_CLIENT_T *)calloc(1, sizeof(TLS_CLIENT_T));
     if (!state) {
         printf("failed to allocate state\n");
         return NULL;

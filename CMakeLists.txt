@@ -37,10 +37,13 @@ set(TLS_CLIENT_SERVER "Your-Boiler-Manager-Server.com")
 # Initialise the Raspberry Pi Pico SDK
 pico_sdk_init()
 
+# Add OneWire library
+add_subdirectory(Modules/pico-onewire)
+
 # Add executable. Default name is the project name, version 0.1
 add_executable(boiler_client_background
-        boiler_client.c
-        tls_common.c
+        boiler_client.cpp
+        tls_common.cpp
         )
 target_compile_definitions(boiler_client_background PRIVATE
         WIFI_SSID=\"${WIFI_SSID}\"
@@ -60,6 +63,7 @@ target_link_libraries(boiler_client_background
         pico_lwip_mbedtls
         pico_mbedtls
         pico_stdlib
+        pico_one_wire
         )
 #generate uf2
 pico_add_extra_outputs(boiler_client_background)

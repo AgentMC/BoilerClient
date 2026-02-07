@@ -7,6 +7,9 @@
 #include "pico/stdlib.h"
 #include "pico/cyw43_arch.h"
 
+#include "one_wire.h"
+#include "tls_common.h"
+
 #define TLS_CLIENT_HTTP_REQUEST  "GET /net_install/boot.sig HTTP/1.1\r\n" \
                                  "Host: " TLS_CLIENT_SERVER "\r\n" \
                                  "Connection: close\r\n" \
