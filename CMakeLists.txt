@@ -43,7 +43,6 @@ add_subdirectory(Modules/pico-onewire)
 # Add executable. Default name is the project name, version 0.1
 add_executable(boiler_client_background
         boiler_client.cpp
-        tls_common.cpp
         )
 target_compile_definitions(boiler_client_background PRIVATE
         WIFI_SSID=\"${WIFI_SSID}\"
