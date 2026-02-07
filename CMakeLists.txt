@@ -32,12 +32,12 @@ project(boiler_client C CXX ASM)
 
 set(WIFI_SSID "Your Wi-Fi SSID")
 set(WIFI_PASSWORD "Your Wi-Fi Password")
+set(TLS_CLIENT_SERVER "Your-Boiler-Manager-Server.com")
 
 # Initialise the Raspberry Pi Pico SDK
 pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
-
 add_executable(boiler_client_background
         boiler_client.c
         tls_common.c
@@ -45,17 +45,23 @@ add_executable(boiler_client_background
 target_compile_definitions(boiler_client_background PRIVATE
         WIFI_SSID=\"${WIFI_SSID}\"
         WIFI_PASSWORD=\"${WIFI_PASSWORD}\"
+        TLS_CLIENT_SERVER=\"${TLS_CLIENT_SERVER}\"
         )
 target_include_directories(boiler_client_background PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}
         ${CMAKE_CURRENT_LIST_DIR}/.. # for our common lwipopts and mbedtls_config.h
         )
+#Enable USB, disable UART
+pico_enable_stdio_usb(boiler_client_background 1)
+pico_enable_stdio_uart(boiler_client_background 0)
+#dependencies
 target_link_libraries(boiler_client_background
         pico_cyw43_arch_lwip_threadsafe_background
         pico_lwip_mbedtls
         pico_mbedtls
         pico_stdlib
         )
+#generate uf2
 pico_add_extra_outputs(boiler_client_background)
 
 # Ignore warnings from lwip code
