@@ -28,7 +28,7 @@ set(PICO_BOARD pico_w CACHE STRING "Board type")
 # Pull in Raspberry Pi Pico SDK (must be before project)
 include(pico_sdk_import.cmake)
 
-project(picow_tls_client C CXX ASM)
+project(boiler_client C CXX ASM)
 
 set(WIFI_SSID "Your Wi-Fi SSID")
 set(WIFI_PASSWORD "Your Wi-Fi Password")
@@ -38,25 +38,25 @@ pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(picow_tls_client_background
-        picow_tls_client.c
+add_executable(boiler_client_background
+        boiler_client.c
         tls_common.c
         )
-target_compile_definitions(picow_tls_client_background PRIVATE
+target_compile_definitions(boiler_client_background PRIVATE
         WIFI_SSID=\"${WIFI_SSID}\"
         WIFI_PASSWORD=\"${WIFI_PASSWORD}\"
         )
-target_include_directories(picow_tls_client_background PRIVATE
+target_include_directories(boiler_client_background PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}
         ${CMAKE_CURRENT_LIST_DIR}/.. # for our common lwipopts and mbedtls_config.h
         )
-target_link_libraries(picow_tls_client_background
+target_link_libraries(boiler_client_background
         pico_cyw43_arch_lwip_threadsafe_background
         pico_lwip_mbedtls
         pico_mbedtls
         pico_stdlib
         )
-pico_add_extra_outputs(picow_tls_client_background)
+pico_add_extra_outputs(boiler_client_background)
 
 # Ignore warnings from lwip code
 set_source_files_properties(
